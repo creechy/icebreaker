@@ -49,7 +49,7 @@ public class TableCommands {
                 System.out.println("Location: " + table.location());
                 if (table instanceof HasTableOperations tableOperations) {
                     int formatVersion = tableOperations.operations().current().formatVersion();
-                    System.out.println("Format Version: " + formatVersion);
+                    System.out.println("Format version: " + formatVersion);
                     tableOperations.operations().current().statisticsFiles();
                 }
                 Map<String, Object> snapshotMap = JsonUtil.snapshotToMap(table.currentSnapshot());
