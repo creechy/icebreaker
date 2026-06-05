@@ -45,7 +45,7 @@ public class TableCommands {
 
                 Table table = context.getCatalog().loadTable(identifier);
 
-                System.out.println("Successfully loaded table: " + table.name());
+                System.out.println("Table: " + table.name());
                 System.out.println("Location: " + table.location());
                 if (table instanceof HasTableOperations tableOperations) {
                     int formatVersion = tableOperations.operations().current().formatVersion();
