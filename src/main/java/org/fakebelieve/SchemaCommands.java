@@ -12,20 +12,26 @@ public class SchemaCommands {
             aliases = {"namespaces"},
             description = "List all schemas in the catalog")
     static class ListSchemasCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ListSchemasCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
             try {
                 // List namespaces under the root namespace (empty namespace)
-                List<Namespace> schemas = ((RESTCatalog) Icebreaker.catalog).listNamespaces(Namespace.empty());
+                List<Namespace> schemas = ((RESTCatalog) context.getCatalog()).listNamespaces(Namespace.empty());
 
                 if (schemas.isEmpty()) {
-                    System.out.println("No schemas found in catalog '" + Icebreaker.catalogName + "'");
+                    System.out.println("No schemas found in catalog '" + context.getCatalogName() + "'");
                 } else {
-                    System.out.println("Schemas in catalog '" + Icebreaker.catalogName + "':");
+                    System.out.println("Schemas in catalog '" + context.getCatalogName() + "':");
                     for (Namespace namespace : schemas) {
                         System.out.println("  " + namespace);
                     }
@@ -41,12 +47,18 @@ public class SchemaCommands {
             aliases = {"schema", "namespace"},
             description = "Set the current schema/namespace")
     static class UseSchemaCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public UseSchemaCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Schema name to use")
         String schemaName;
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
@@ -54,10 +66,10 @@ public class SchemaCommands {
                 Namespace namespace = Namespace.of(schemaName);
 
                 // Verify the namespace exists by trying to load it
-                Map<String, String> properties = ((RESTCatalog) Icebreaker.catalog).loadNamespaceMetadata(namespace);
+                Map<String, String> properties = ((RESTCatalog) context.getCatalog()).loadNamespaceMetadata(namespace);
 
                 // Set the current schema
-                Icebreaker.currentSchema = namespace;
+                context.setCurrentSchema(namespace);
 
                 System.out.println("Using schema: " + namespace);
                 if (!properties.isEmpty()) {

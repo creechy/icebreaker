@@ -24,20 +24,26 @@ import picocli.CommandLine;
 public class TableCommands {
     @CommandLine.Command(name = "table", description = "Load an Iceberg table")
     static class LoadTableCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public LoadTableCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
 
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 System.out.println("Successfully loaded table: " + table.name());
                 System.out.println("Location: " + table.location());
@@ -59,6 +65,12 @@ public class TableCommands {
 
     @CommandLine.Command(name = "data-files", description = "List all data files in an Iceberg table")
     static class ListDataFilesCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ListDataFilesCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -84,14 +96,14 @@ public class TableCommands {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 // Use specified snapshot or current snapshot
                 Snapshot snapshot = snapshotId != null ? table.snapshot(snapshotId) : table.currentSnapshot();
@@ -158,6 +170,12 @@ public class TableCommands {
 
     @CommandLine.Command(name = "stats-files", description = "List all stats files in an Iceberg table")
     static class ListStatsFilesCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ListStatsFilesCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -168,14 +186,14 @@ public class TableCommands {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 System.out.println("Stats files in table '" + identifier + "'");
 
@@ -215,24 +233,30 @@ public class TableCommands {
 
     @CommandLine.Command(name = "tables", description = "List all tables in the current schema")
     static class ListTablesCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ListTablesCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Schema name (optional)", arity = "0..1")
         String schemaName;
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            if (Icebreaker.currentSchema == null && schemaName == null) {
+            if (context.getCurrentSchema() == null && schemaName == null) {
                 System.err.println("No schema selected. Use 'schema' command, or an explicit schema.");
                 return;
             }
 
-            Namespace schema = (schemaName != null) ? Namespace.of(schemaName) : Icebreaker.currentSchema;
+            Namespace schema = (schemaName != null) ? Namespace.of(schemaName) : context.getCurrentSchema();
 
             try {
-                List<TableIdentifier> tables = Icebreaker.catalog.listTables(schema);
+                List<TableIdentifier> tables = context.getCatalog().listTables(schema);
 
                 if (tables.isEmpty()) {
                     System.out.println("No tables found in schema '" + schema + "'");
@@ -250,6 +274,12 @@ public class TableCommands {
 
     @CommandLine.Command(name = "snapshots", description = "List all snapshots in an Iceberg table")
     static class ListSnapshotsCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ListSnapshotsCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -260,14 +290,14 @@ public class TableCommands {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
                 Iterable<Snapshot> snapshots = table.snapshots();
 
                 System.out.println("Snapshots in table '" + identifier + "':");
@@ -314,6 +344,12 @@ public class TableCommands {
 
     @CommandLine.Command(name = "snapshot", description = "Show details of a specific snapshot in an Iceberg table")
     static class SnapshotCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public SnapshotCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -330,14 +366,14 @@ public class TableCommands {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
                 Snapshot snapshot = table.snapshot(snapshotId);
 
                 if (snapshot != null) {

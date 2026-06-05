@@ -3,9 +3,6 @@ package org.fakebelieve;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
-import org.apache.iceberg.catalog.Catalog;
-import org.apache.iceberg.catalog.Namespace;
-import org.apache.iceberg.catalog.TableIdentifier;
 import org.fusesource.jansi.AnsiConsole;
 import org.jline.console.SystemRegistry;
 import org.jline.console.impl.SystemRegistryImpl;
@@ -36,9 +33,6 @@ import picocli.shell.jline3.PicocliCommands;
             CommandLine.HelpCommand.class
         })
 public class Icebreaker {
-    protected static Catalog catalog;
-    protected static String catalogName;
-    protected static Namespace currentSchema;
 
     public static void main(String[] args) throws Exception {
         Icebreaker cli = new Icebreaker();
@@ -48,10 +42,12 @@ public class Icebreaker {
     public void run(String[] args) throws Exception {
         AnsiConsole.systemInstall();
 
+        IcebreakerContext context = new IcebreakerContext();
+
         Supplier<Path> workDir = () -> Paths.get(System.getProperty("user.dir"));
         Supplier<Path> homeDir = () -> Paths.get(System.getProperty("user.home"));
 
-        CommandLine cmd = new CommandLine(this);
+        CommandLine cmd = new CommandLine(this, new IcebreakerFactory(context));
         PicocliCommands picocliCommands = new PicocliCommands(cmd);
 
         try (Terminal terminal = TerminalBuilder.builder().build()) {
@@ -77,7 +73,7 @@ public class Icebreaker {
             while (true) {
                 try {
                     systemRegistry.cleanUp();
-                    String line = reader.readLine(prompt());
+                    String line = reader.readLine(prompt(context));
                     systemRegistry.execute(line);
                 } catch (UserInterruptException e) {
                     // Ignore
@@ -93,32 +89,16 @@ public class Icebreaker {
         }
     }
 
-    private static String prompt() {
+    private static String prompt(IcebreakerContext context) {
         StringBuilder prompt = new StringBuilder("iceberg");
-        if (catalogName != null) {
-            prompt.append("[").append(catalogName);
-            if (currentSchema != null) {
-                prompt.append(".").append(currentSchema);
+        if (context.getCatalogName() != null) {
+            prompt.append("[").append(context.getCatalogName());
+            if (context.getCurrentSchema() != null) {
+                prompt.append(".").append(context.getCurrentSchema());
             }
             prompt.append("]");
         }
         prompt.append("> ");
         return prompt.toString();
-    }
-
-    protected static TableIdentifier tableIdentifier(String tableIdentifier) {
-        TableIdentifier identifier = TableIdentifier.parse(tableIdentifier);
-        if (!identifier.hasNamespace() && currentSchema != null) {
-            identifier = TableIdentifier.of(currentSchema, identifier.name());
-        }
-        return identifier;
-    }
-
-    protected static boolean activeCatalog() {
-        if (catalog == null) {
-            System.err.println("No catalog configured. Use 'catalog' command first.");
-            return false;
-        }
-        return true;
     }
 }

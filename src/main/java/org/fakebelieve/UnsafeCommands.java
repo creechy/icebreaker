@@ -31,6 +31,12 @@ class UnsafeCommands implements Runnable {
 
     @CommandLine.Command(name = "append-data-file", description = "Append a Parquet data file to an Iceberg table")
     static class UnsafeAppendDataFileCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public UnsafeAppendDataFileCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -39,14 +45,14 @@ class UnsafeCommands implements Runnable {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 try (FileIO io = table.io()) {
                     // Get file size using table.io()
@@ -75,6 +81,12 @@ class UnsafeCommands implements Runnable {
             name = "write-parquet",
             description = "Write data to a Parquet file and commit to an existing Iceberg table")
     static class UnsafeWriteParquetCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public UnsafeWriteParquetCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -86,14 +98,14 @@ class UnsafeCommands implements Runnable {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 // Parse JSON data into records
                 List<Record> records = DataUtil.parseJsonData(jsonData, table.schema());
@@ -118,6 +130,12 @@ class UnsafeCommands implements Runnable {
             name = "credentials",
             description = "Show credentials for accessing an Iceberg table and storage")
     static class ShowCredentialsCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public ShowCredentialsCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Parameters(description = "Table identifier (e.g., default.my_table)")
         String tableIdentifier;
 
@@ -134,14 +152,14 @@ class UnsafeCommands implements Runnable {
 
         @Override
         public void run() {
-            if (!Icebreaker.activeCatalog()) {
+            if (!context.activeCatalog()) {
                 return;
             }
 
-            TableIdentifier identifier = Icebreaker.tableIdentifier(tableIdentifier);
+            TableIdentifier identifier = context.tableIdentifier(tableIdentifier);
 
             try {
-                Table table = Icebreaker.catalog.loadTable(identifier);
+                Table table = context.getCatalog().loadTable(identifier);
 
                 try (FileIO io = table.io()) {
 
