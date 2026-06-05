@@ -50,13 +50,16 @@ env CLASSPATH="$(./gradlew -q printClasspath)" java "org.fakebelieve.Icebreaker"
 |---------|---------|
 | `catalog -n <name> -u <uri>` | Connect to an Iceberg catalog with authentication options |
 | `schemas` | List all available schemas in the current catalog |
-| `schema <name>` | Switch to a specific schema for subsequent operations |
+| `use <name>` | Set the current schema/namespace for subsequent operations |
 | `tables [schema]` | List all tables in the current or specified schema |
 | `table <identifier>` | Display detailed information about a table (schema, properties, current snapshot) |
 | `snapshots <identifier> [-v]` | List all snapshots for a table with optional detailed view |
 | `snapshot <identifier> -s <id> [-v]` | Show details of a specific snapshot including added files |
 | `data-files <identifier> [-v] [-p] [-m]` | List all data files in a table with size and record counts |
 | `stats-files <identifier> [-v]` | List statistics files for a table with blob metadata |
+| `unsafe append-data-file <table_identifier> <parquet_file>` | Append a Parquet data file to an Iceberg table |
+| `unsafe write-parquet <table_identifier> -d <json_data>` | Write data to a Parquet file and commit to an existing Iceberg table |
+| `unsafe credentials <table_identifier>` | Show credentials for accessing an Iceberg table and storage |
 | `help` | Display available commands and usage information |
 
 ## Commands
