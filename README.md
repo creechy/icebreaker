@@ -41,7 +41,7 @@ java -jar build/libs/icebreaker-0.42.0-SNAPSHOT-all.jar
 Or run directly with Gradle:
 
 ```bash
-./gradlew run
+env CLASSPATH="$(./gradlew -q printClasspath)" java "org.fakebelieve.Icebreaker"
 ```
 
 ## Quick Reference
