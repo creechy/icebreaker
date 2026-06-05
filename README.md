@@ -13,7 +13,7 @@ An interactive command-line interface for exploring and managing Apache Iceberg 
 
 ## Prerequisites
 
-- Java 11 or higher
+- Java 17 or higher
 - Gradle (included via Gradle wrapper)
 
 ## Building
