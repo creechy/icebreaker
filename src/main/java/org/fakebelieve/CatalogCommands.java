@@ -16,6 +16,12 @@ import picocli.CommandLine;
 public class CatalogCommands {
     @CommandLine.Command(name = "catalog", description = "Configure Iceberg catalog")
     static class CatalogCommand implements Runnable {
+        private final IcebreakerContext context;
+
+        public CatalogCommand(IcebreakerContext context) {
+            this.context = context;
+        }
+
         @CommandLine.Option(
                 names = {"-n", "--name"},
                 description = "Catalog name",
@@ -124,8 +130,8 @@ public class CatalogCommands {
                     }
                 }
 
-                Icebreaker.catalog = CatalogUtil.loadCatalog(catalogClass, name, props, null);
-                Icebreaker.catalogName = name;
+                context.setCatalog(CatalogUtil.loadCatalog(catalogClass, name, props, null));
+                context.setCatalogName(name);
 
                 System.out.println("Catalog '" + name + "' configured successfully");
                 System.out.println("Class: " + catalogClass);
